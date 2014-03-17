@@ -1,9 +1,21 @@
 #include "stm32f10x.h"
 #include "RTOSConfig.h"
 
+//#include "kernel.h"
 #include "syscall.h"
 
+#ifdef DEBUG
+#include "unit_test.h"
+#endif
+
 #include <stddef.h>
+#include <ctype.h>
+
+void *malloc(size_t size)
+{
+	static char m[1024] = {0};
+	return m;
+}
 
 void *memcpy(void *dest, const void *src, size_t n);
 
@@ -665,15 +677,15 @@ void show_task_info(int argc, char* argv[])
 		char task_info_priority[3];
 
 		task_info_pid[0]='0'+tasks[task_i].pid;
-		task_info_pid[1]='\0';
+//		task_info_pid[1]='\0';
 		task_info_status[0]='0'+tasks[task_i].status;
-		task_info_status[1]='\0';			
+//		task_info_status[1]='\0';			
 
 		itoa(tasks[task_i].priority, task_info_priority, 10);
 
 		write(fdout, &task_info_pid , 2);
 		write_blank(3);
-			write(fdout, &task_info_status , 2);
+		write(fdout, &task_info_status , 2);
 		write_blank(5);
 		write(fdout, &task_info_priority , 3);
 
@@ -1269,6 +1281,10 @@ int main()
 			i++;
 		current_task = task_pop(&ready_list[i])->pid;
 	}
+
+#ifdef DEBUG
+	unit_test();
+#endif
 
 	return 0;
 }
